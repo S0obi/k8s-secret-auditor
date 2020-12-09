@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/googleapis/gnostic v0.5.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
+	github.com/olekukonko/tablewriter v0.0.4
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/crypto v0.0.0-20201203163018-be400aefbc4c // indirect
 	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb // indirect

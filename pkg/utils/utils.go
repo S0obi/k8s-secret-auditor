@@ -2,8 +2,11 @@ package utils
 
 import (
 	"math"
+	"os"
 	"strings"
 	"unicode"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 // IsPassword : determine if the value is a password
@@ -40,4 +43,15 @@ func ComputeEntropy(value string) float64 {
 
 	result := characteristics["digit"] + characteristics["lower"] + characteristics["upper"] + characteristics["symbols"]
 	return math.Log2(result) * float64(len(value))
+}
+
+// PrintResultTable : Render result table
+func PrintResultTable(data [][]string) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Secret name", "Value", "Info"})
+
+	for _, v := range data {
+		table.Append(v)
+	}
+	table.Render()
 }
