@@ -12,7 +12,7 @@ import (
 
 func main() {
 	var namespace string
-	config := config.NewConfig()
+	var configPath string
 
 	app := &cli.App{
 		Flags: []cli.Flag{
@@ -22,10 +22,18 @@ func main() {
 				Usage:       "Audit a specific namespace",
 				Destination: &namespace,
 			},
+			&cli.StringFlag{
+				Name:        "config",
+				Value:       "config.yaml",
+				Aliases:     []string{"c", "conf"},
+				Usage:       "Set a specific config file",
+				Destination: &configPath,
+			},
 		},
 		Name:  "k8s-secret-auditor",
 		Usage: "Audit Kubernetes secrets",
 		Action: func(context *cli.Context) error {
+			config := config.NewConfig(configPath)
 			commands.Audit(config, namespace)
 			return nil
 		},

@@ -23,8 +23,7 @@ type PasswordInfo struct {
 
 // NewPasswordInfo : Constructor of PasswordInfo struct
 func NewPasswordInfo(key string, value string) *PasswordInfo {
-	s := PasswordInfo{name: key, value: value, entropy: utils.ComputeEntropy(value)}
-	return &s
+	return &PasswordInfo{name: key, value: value, entropy: utils.ComputeEntropy(value)}
 }
 
 // Audit : Audit Kubernetes secrets
@@ -63,9 +62,8 @@ func evaluateSecret(secret *v1.Secret, config *config.Config) *PasswordInfo {
 func isCompliant(passwordInfo *PasswordInfo, config *config.Config) bool {
 	if len(passwordInfo.value) < config.Policy.Length || passwordInfo.entropy < config.Policy.Entropy {
 		return false
-	} else {
-		return true
 	}
+	return true
 }
 
 func initClient(namespace string) *kubernetes.Clientset {

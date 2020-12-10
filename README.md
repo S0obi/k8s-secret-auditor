@@ -29,6 +29,6 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    --namespace value, -n value, --ns value  Audit a specific namespace
+   --config value, -c value, --conf value   Set a specific config file (default: "config.yaml")
    --help, -h                               show help (default: false)
-
 ```

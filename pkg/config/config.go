@@ -15,10 +15,10 @@ type Config struct {
 }
 
 // NewConfig : Load current config (config.yaml)
-func NewConfig() *Config {
+func NewConfig(configPath string) *Config {
 	config := new(Config)
 
-	data, err := ioutil.ReadFile("config.yaml")
+	data, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		panic(err.Error())
 	}
