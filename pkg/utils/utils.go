@@ -6,12 +6,13 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/S0obi/k8s-secret-auditor/pkg/config"
 	"github.com/olekukonko/tablewriter"
 )
 
 // IsPassword : determine if the value is a password
-func IsPassword(value string) bool {
-	for _, password := range []string{"password", "pwd", "pass"} {
+func IsPassword(value string, config *config.Config) bool {
+	for _, password := range config.PasswordPatterns {
 		if strings.Contains(strings.ToLower(value), password) {
 			return true
 		}
