@@ -8,7 +8,9 @@ import (
 
 // Config : Global Config
 type Config struct {
-	Policy struct {
+	IgnoredNamespaces []string `yaml:"ignoredNamespaces"`
+	PasswordPatterns  []string `yaml:"passwordPatterns"`
+	Policy            struct {
 		Length  int     `yaml:"length"`
 		Entropy float64 `yaml:"entropy"`
 	}
@@ -25,6 +27,10 @@ func NewConfig(configPath string) *Config {
 
 	if err = yaml.UnmarshalStrict(data, &config); err != nil {
 		panic(err.Error())
+	}
+
+	if len(config.PasswordPatterns) == 0 {
+		config.PasswordPatterns = append(config.PasswordPatterns, "password", "pass", "pwd")
 	}
 
 	return config

@@ -15,6 +15,7 @@
 # vendor/
 
 _bin
+pkg/mod
 
 .DS_Store
 .gopath

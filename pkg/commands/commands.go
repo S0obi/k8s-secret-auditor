@@ -30,11 +30,18 @@ func NewPasswordInfo(key string, value string) *PasswordInfo {
 func Audit(config *config.Config, namespace string) {
 	clientset := initClient(namespace)
 	fmt.Printf("Audit secrets containing passwords\n\n")
-	secrets, err := clientset.CoreV1().Secrets(namespace).List(context.TODO(), metav1.ListOptions{FieldSelector: "metadata.namespace!=kube-system,type==Opaque"})
+
+	ignoredNamespaces := ""
+	for _, ignoredNamespace := range config.IgnoredNamespaces {
+		ignoredNamespaces += fmt.Sprintf("metadata.namespace!=%s,", ignoredNamespace)
+	}
+
+	secrets, err := clientset.CoreV1().Secrets(namespace).List(context.TODO(), metav1.ListOptions{FieldSelector: ignoredNamespaces + "type==Opaque"})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
 	var results [][]string
 	for _, secret := range secrets.Items {
 		passwordInfo := evaluateSecret(&secret, config)
@@ -50,7 +57,7 @@ func Audit(config *config.Config, namespace string) {
 
 func evaluateSecret(secret *v1.Secret, config *config.Config) *PasswordInfo {
 	for key, value := range secret.Data {
-		if utils.IsPassword(string(key)) {
+		if utils.IsPassword(string(key), config) {
 			s := NewPasswordInfo(key, string(value))
 			s.compliant = isCompliant(s, config)
 			return s

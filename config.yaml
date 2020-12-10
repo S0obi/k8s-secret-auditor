@@ -1,3 +1,9 @@
+ignoredNamespaces:
+  - kube-system
+passwordPatterns:
+  - password
+  - pass
+  - pwd
 policy:
   length: 10
   entropy: 64.0
