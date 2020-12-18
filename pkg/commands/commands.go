@@ -6,25 +6,13 @@ import (
 	"os"
 
 	"github.com/S0obi/k8s-secret-auditor/pkg/config"
+	"github.com/S0obi/k8s-secret-auditor/pkg/password"
 	"github.com/S0obi/k8s-secret-auditor/pkg/utils"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
-
-// PasswordInfo : Password information
-type PasswordInfo struct {
-	name      string
-	value     string
-	compliant bool
-	entropy   float64
-}
-
-// NewPasswordInfo : Constructor of PasswordInfo struct
-func NewPasswordInfo(key string, value string) *PasswordInfo {
-	return &PasswordInfo{name: key, value: value, entropy: utils.ComputeEntropy(value)}
-}
 
 // Audit : Audit Kubernetes secrets
 func Audit(config *config.Config, namespace string) {
@@ -45,32 +33,27 @@ func Audit(config *config.Config, namespace string) {
 	var results [][]string
 	for _, secret := range secrets.Items {
 		passwordInfo := evaluateSecret(&secret, config)
-		if passwordInfo != nil && !passwordInfo.compliant {
-			secretName := fmt.Sprintf("%s/%s", secret.Namespace, passwordInfo.name)
-			info := fmt.Sprintf("entropy=%f, length=%d", passwordInfo.entropy, len(passwordInfo.value))
-			results = append(results, []string{secretName, passwordInfo.value, info})
+		if passwordInfo != nil && !passwordInfo.Compliant {
+			secretName := fmt.Sprintf("%s/%s", secret.Namespace, passwordInfo.Name)
+			info := fmt.Sprintf("entropy=%f, length=%d", passwordInfo.Entropy, len(passwordInfo.Value))
+
+			results = append(results, []string{secretName, passwordInfo.Value, info})
 		}
 	}
+
 	fmt.Printf("%d/%d are not compliant to the policy\n", len(results), len(secrets.Items))
 	utils.PrintResultTable(results)
 }
 
-func evaluateSecret(secret *v1.Secret, config *config.Config) *PasswordInfo {
+func evaluateSecret(secret *v1.Secret, config *config.Config) *password.Password {
 	for key, value := range secret.Data {
-		if utils.IsPassword(string(key), config) {
-			s := NewPasswordInfo(key, string(value))
-			s.compliant = isCompliant(s, config)
+		if password.IsPassword(string(key), config) {
+			s := password.NewPassword(key, string(value))
+			s.Compliant = s.IsCompliant(config)
 			return s
 		}
 	}
 	return nil
-}
-
-func isCompliant(passwordInfo *PasswordInfo, config *config.Config) bool {
-	if len(passwordInfo.value) < config.Policy.Length || passwordInfo.entropy < config.Policy.Entropy {
-		return false
-	}
-	return true
 }
 
 func initClient(namespace string) *kubernetes.Clientset {
